@@ -16,7 +16,7 @@ class QuestionsViewController: UIViewController,UICollectionViewDelegate,UIColle
 
     //TODO:: PULL DATA FROM FIREBASE
     let questions = [
-        0 : "What is 5 + 10?",
+        0 : "What is 5 + 10? ",
         1 : "What is 10 + 10?",
         2 : "What is 20 - 9?",
         3 : "What is 100 - 4?",
