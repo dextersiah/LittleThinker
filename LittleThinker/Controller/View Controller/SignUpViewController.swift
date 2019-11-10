@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import FirebaseAuth
+import Firebase
 
 class SignUpViewController: UIViewController {
 
@@ -26,6 +28,14 @@ class SignUpViewController: UIViewController {
         
         //Hide Keyboard on outside tap
         self.hideKeyboard()
+
+        
+        if #available(iOS 10.0, *) {
+            passwordText.textContentType = UITextContentType("")
+            passwordText.autocorrectionType = .no
+            confirmPasswordText.textContentType = UITextContentType("")
+            confirmPasswordText.autocorrectionType = .no
+        }
         
     }
 
@@ -42,12 +52,39 @@ class SignUpViewController: UIViewController {
         errorMessage.text = ""
         
         if emailText.text == "" || usernameText.text == "" || passwordText.text == "" || confirmPasswordText.text == "" {
-            errorMessage.text = "All Fields Are Required"
+            errorMessage.text = "All fields are required"
         }else{
-            //TODO:: ADD USER TO FIREBASE AUTHENTICATION AND USERNAME TO FIREBASE WITH REFERENCE ID
             
+            if passwordText.text != confirmPasswordText.text {
+                errorMessage.text = "Password does mot match"
+            }else{
+                
+                let name = usernameText.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+                let email = emailText.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+                let password = passwordText.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+                
+                
+                //TODO:: ADD USER TO FIREBASE AUTHENTICATION AND USERNAME TO FIREBASE WITH REFERENCE ID
+                Auth.auth().createUser(withEmail: email, password: password) { (result, error) in
+                    if error != nil {
+                        self.errorMessage.text = error?.localizedDescription
+                    }else{
+                        let db = Firestore.firestore()
+                        
+                        
+                        db.collection("User").addDocument(data: ["name":name.capitalized,"uid":result!.user.uid], completion: { (error) in
+                            if error != nil {
+                                self.errorMessage.text = error?.localizedDescription
+                            }else{
+                                _ = self.navigationController?.popViewController(animated: true)
+                            }
+                        })
+                    }
+                }
+            }
+
             
-            errorMessage.text = "Sucessfully Created Account"
+            errorMessage.text = "Sucessfully created account"
         }
     }
     

@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import FirebaseAuth
+import Firebase
 
 class ViewController: UIViewController {
     
@@ -14,6 +16,13 @@ class ViewController: UIViewController {
     @IBOutlet weak var emailField: TextFieldRoudedBorder!
     @IBOutlet weak var passwordField: TextFieldRoudedBorder!
     @IBOutlet weak var errorMessage: UILabel!
+    
+    var userName:String = ""
+    
+    //Firebase Declaration
+    let db = Firestore.firestore()
+    let authenetication = Auth.auth()
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,9 +52,38 @@ class ViewController: UIViewController {
         if emailField.text == "" || passwordField.text == ""{
             errorMessage.text = "All Fields Are Required"
         }else{
-            //TODO:: GET USER FROM FIREBASE THROUGH EMAIL AND PASSWORD
-            print("login")
             
+            let email = emailField.text!
+            let password = passwordField.text!
+            
+            
+            //TODO:: GET USER FROM FIREBASE THROUGH EMAIL AND PASSWORD
+            Auth.auth().signIn(withEmail: email, password: password) { (user, error) in
+                if error != nil {
+                    self.errorMessage.text = error!.localizedDescription
+                }else{
+                    
+                    let currentUser = Auth.auth().currentUser
+                    
+                    if currentUser != nil {
+                        let userId = currentUser!.uid
+                        print(userId)
+                        self.db.collection("User").whereField("uid", isEqualTo: userId).getDocuments { (querySnapshot, error) in
+                            
+                            
+                            for document in querySnapshot!.documents {
+                                let name = document.get("name") as! String
+                                self.userName = name
+
+                            }
+                        }
+                    }
+                    
+                    
+                    self.performSegue(withIdentifier: "homePage", sender: self)
+                }
+            }
+
             
             
             
@@ -53,7 +91,7 @@ class ViewController: UIViewController {
             emailField.text = ""
             passwordField.text = ""
             
-            performSegue(withIdentifier: "homePage", sender: self)
+
         }
     }
     
@@ -69,7 +107,8 @@ class ViewController: UIViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "homePage" {
-            _ = segue.destination as! HomeViewController
+            let vc = segue.destination as! HomeViewController
+            vc.user = userName
         }
         
         if segue.identifier == "forgotPassword" {
@@ -107,7 +146,7 @@ extension UIViewController{
         let backButton = UIButton(type: .system)
         backButton.setImage(#imageLiteral(resourceName: "Export").withRenderingMode(.alwaysOriginal), for: .normal)
         backButton.frame = CGRect(x: 0, y: 0, width: 16, height: 16)
-        backButton.addTarget(self, action: #selector(self.back(sender:)), for: .touchUpInside)
+        backButton.addTarget(self, action: #selector(self.logout(sender:)), for: .touchUpInside)
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: backButton)
         
         //Make it opaque
@@ -121,6 +160,17 @@ extension UIViewController{
     
     @objc func back(sender: UIBarButtonItem){
         self.navigationController?.popViewController(animated: true)
+    }
+    
+    @objc func logout(sender: UIBarButtonItem){
+        let authentication = Auth.auth()
+        do {
+            try authentication.signOut()
+        } catch let signOutError as NSError {
+            print ("Error signing out: %@", signOutError)
+        }
+
+         self.navigationController?.popViewController(animated: true)
     }
     
     

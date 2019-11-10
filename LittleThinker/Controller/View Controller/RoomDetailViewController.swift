@@ -32,7 +32,7 @@ import UIKit
         @IBOutlet weak var collectionView: UICollectionView!
     
         var deleteStudentId:Int = 0
-        var roomId:Int = 0
+        var roomId:String = ""
         
          //TODO:: PULL DATA FROM FIREBASE BAED ON roomId USE SNAPSHOT LISTENER FOR REALTIME UPDATE
         var students = ["Brandon","Brenda","Louise","Angela","Arthur"]

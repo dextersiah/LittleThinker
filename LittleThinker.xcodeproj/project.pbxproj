@@ -35,6 +35,7 @@
 		10DFFAEC2371DA72002ADEBE /* RoundedCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10DFFAEB2371DA72002ADEBE /* RoundedCards.swift */; };
 		10FD2F422375DD68003FB860 /* GenerateReportViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10FD2F412375DD68003FB860 /* GenerateReportViewController.swift */; };
 		10FD2F442375DD7B003FB860 /* ReportDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10FD2F432375DD7B003FB860 /* ReportDetailsViewController.swift */; };
+		38ED4074D3BD60294B8251C9 /* Pods_LittleThinker.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6C9554501C669F30766D029E /* Pods_LittleThinker.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -68,6 +69,9 @@
 		10DFFAEB2371DA72002ADEBE /* RoundedCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundedCards.swift; sourceTree = "<group>"; };
 		10FD2F412375DD68003FB860 /* GenerateReportViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GenerateReportViewController.swift; path = "LittleThinker/Controller/View Controller/GenerateReportViewController.swift"; sourceTree = SOURCE_ROOT; };
 		10FD2F432375DD7B003FB860 /* ReportDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ReportDetailsViewController.swift; path = "LittleThinker/Controller/View Controller/ReportDetailsViewController.swift"; sourceTree = SOURCE_ROOT; };
+		62CF287A17FCEE342CA844DA /* Pods-LittleThinker.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LittleThinker.release.xcconfig"; path = "Target Support Files/Pods-LittleThinker/Pods-LittleThinker.release.xcconfig"; sourceTree = "<group>"; };
+		6C9554501C669F30766D029E /* Pods_LittleThinker.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LittleThinker.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		DCE15101FF32C66B7FA0AA8E /* Pods-LittleThinker.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LittleThinker.debug.xcconfig"; path = "Target Support Files/Pods-LittleThinker/Pods-LittleThinker.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +79,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				38ED4074D3BD60294B8251C9 /* Pods_LittleThinker.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -96,6 +101,8 @@
 			children = (
 				108C0A8823707D88004C5B0D /* LittleThinker */,
 				108C0A8723707D88004C5B0D /* Products */,
+				B43657E65B18E2236F5CF52F /* Pods */,
+				C843491F5C9C92C286A472A7 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -181,6 +188,23 @@
 			path = "External Libraries";
 			sourceTree = "<group>";
 		};
+		B43657E65B18E2236F5CF52F /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				DCE15101FF32C66B7FA0AA8E /* Pods-LittleThinker.debug.xcconfig */,
+				62CF287A17FCEE342CA844DA /* Pods-LittleThinker.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		C843491F5C9C92C286A472A7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				6C9554501C669F30766D029E /* Pods_LittleThinker.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -188,9 +212,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 108C0A9823707D88004C5B0D /* Build configuration list for PBXNativeTarget "LittleThinker" */;
 			buildPhases = (
+				AFEFF97A3ECEACAC206EC6CC /* [CP] Check Pods Manifest.lock */,
 				108C0A8223707D88004C5B0D /* Sources */,
 				108C0A8323707D88004C5B0D /* Frameworks */,
 				108C0A8423707D88004C5B0D /* Resources */,
+				EE4B2D5A49957C65F7E8FC08 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -253,6 +279,63 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		AFEFF97A3ECEACAC206EC6CC /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-LittleThinker-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		EE4B2D5A49957C65F7E8FC08 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-LittleThinker/Pods-LittleThinker-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/BoringSSL-GRPC/openssl_grpc.framework",
+				"${BUILT_PRODUCTS_DIR}/GTMSessionFetcher/GTMSessionFetcher.framework",
+				"${BUILT_PRODUCTS_DIR}/GoogleUtilities/GoogleUtilities.framework",
+				"${BUILT_PRODUCTS_DIR}/Protobuf/protobuf.framework",
+				"${BUILT_PRODUCTS_DIR}/gRPC-C++/grpcpp.framework",
+				"${BUILT_PRODUCTS_DIR}/gRPC-Core/grpc.framework",
+				"${BUILT_PRODUCTS_DIR}/leveldb-library/leveldb.framework",
+				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/openssl_grpc.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GTMSessionFetcher.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleUtilities.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/protobuf.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/grpcpp.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/grpc.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/leveldb.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-LittleThinker/Pods-LittleThinker-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		108C0A8223707D88004C5B0D /* Sources */ = {
@@ -412,10 +495,12 @@
 		};
 		108C0A9923707D88004C5B0D /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = DCE15101FF32C66B7FA0AA8E /* Pods-LittleThinker.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = FRRK459SBT;
 				INFOPLIST_FILE = LittleThinker/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
@@ -430,6 +515,7 @@
 		};
 		108C0A9A23707D88004C5B0D /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 62CF287A17FCEE342CA844DA /* Pods-LittleThinker.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";

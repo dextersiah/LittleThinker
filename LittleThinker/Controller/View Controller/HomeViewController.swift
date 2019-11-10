@@ -7,21 +7,26 @@
 //
 
 import UIKit
-
+import FirebaseAuth
+import Firebase
 
 class HomeViewController: UIViewController,UICollectionViewDelegate,UICollectionViewDataSource {
 
-    
+    let db = Firestore.firestore()
     let reuseIdentifier = "cell"
     var myTitle = ["Science","Maths"]
     var myImage = ["undraw_science_fqhl","undraw_mathematics_4otb"]
     var row : Int = 0
+    var user:String = ""
     
     @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var userName: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         customLogoutButton()
+        
+        userName.text = user
         
     }
 
