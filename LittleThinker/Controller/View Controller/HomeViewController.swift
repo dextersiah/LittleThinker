@@ -25,6 +25,8 @@ class HomeViewController: UIViewController,UICollectionViewDelegate,UICollection
     override func viewDidLoad() {
         super.viewDidLoad()
         customLogoutButton()
+        print("username is \(user)")
+        
         
         userName.text = user
         

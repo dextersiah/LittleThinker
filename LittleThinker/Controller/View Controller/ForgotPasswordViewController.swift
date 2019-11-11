@@ -7,6 +7,9 @@
 //
 
 import UIKit
+import FirebaseAuth
+import ProgressHUD
+
 
 class ForgotPasswordViewController: UIViewController {
 
@@ -40,7 +43,18 @@ class ForgotPasswordViewController: UIViewController {
         errorMessage.text = ""
         
         if emailText.text == "" {
-            errorMessage.text = "Email Field is Required"
+            ProgressHUD.showError("Email Field is Required")
+        }else{
+            
+            let email = emailText.text!
+            
+            Auth.auth().sendPasswordReset(withEmail: email) { (error) in
+                if error == nil {
+                     ProgressHUD.showSuccess("A Reset Password Has Been Sent To Your Email")
+                }else{
+                    ProgressHUD.showError(error?.localizedDescription)
+                }
+            }
         }
     }
 }

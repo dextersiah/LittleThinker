@@ -7,11 +7,17 @@
 //
 
 import UIKit
+import Firebase
+import ProgressHUD
 
 class AddStudentViewController: UIViewController {
 
     @IBOutlet weak var cancelButton: UIButton!
     @IBOutlet weak var studentName: UITextField!
+    
+    var roomId:String = ""
+    
+    let db = Firestore.firestore()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,7 +38,6 @@ class AddStudentViewController: UIViewController {
         studentName.borderStyle = .none
         studentName.layer.addSublayer(bottomLine)
         
-        
         // Do any additional setup after loading the view.
     }
 
@@ -42,9 +47,19 @@ class AddStudentViewController: UIViewController {
     }
 
     @IBAction func confirmAddStudent(_ sender: Any) {
-        
+        ProgressHUD.show()
         //TODO:: ADD STUDENT TO FIREBASE
-        dismiss(animated: true, completion: nil)
+        db.collection("Room").document(roomId).setData(["student" : [studentName.text!.capitalized:studentName.text?.capitalized]], merge: true) { (error) in
+            if error != nil {
+                print("Error adding student data")
+            }else{
+                ProgressHUD.dismiss()
+                self.dismiss(animated: true, completion: nil)
+            }
+        }
+        
+        
+      
     }
     
     

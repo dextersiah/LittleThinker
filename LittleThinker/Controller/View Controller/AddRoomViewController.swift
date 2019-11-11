@@ -7,14 +7,23 @@
 //
 
 import UIKit
+import Firebase
+import ProgressHUD
+
 
 class AddRoomViewController: UIViewController {
 
     
     @IBOutlet weak var subjectSelection: DropDown!
-    @IBOutlet weak var studentName: UITextField!
+    @IBOutlet weak var className: UITextField!
     @IBOutlet weak var cancelButton: UIButton!
+    
     var subjects = [String]()
+    var subjectSelected = ""
+    var teacherName = ""
+    
+    let db = Firestore.firestore()
+    let currentUserId = Auth.auth().currentUser?.uid
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,26 +36,20 @@ class AddRoomViewController: UIViewController {
         //Adding Bottom Line TextField Style
         let bottomLine = CALayer()
         
-        bottomLine.frame = CGRect(x: 0, y: studentName.frame.height - 2, width: studentName.frame.width, height: 1)
+        bottomLine.frame = CGRect(x: 0, y: className.frame.height - 2, width: className.frame.width, height: 1)
         
         bottomLine.backgroundColor = UIColor(red: 180/255, green: 180/255, blue: 180/255, alpha: 0.5).cgColor
         
-        studentName.borderStyle = .none
-        studentName.layer.addSublayer(bottomLine)
+        className.borderStyle = .none
+        className.layer.addSublayer(bottomLine)
         
-        
-        
-        
-        
-        //Drop Down Library
-        subjectSelection.arrowColor = .white
         
         //TODO:: PULL DATA FROM FIREBASE AND ADD TO subjects VARIABLE 
         subjectSelection.optionArray = ["Maths","Science","English"]
         subjectSelection.optionIds = [1,2,3]
         
         subjectSelection.didSelect{(selectedText,index,id) in
-            print(selectedText)
+            self.subjectSelected = selectedText
         }
     }
 
@@ -58,15 +61,32 @@ class AddRoomViewController: UIViewController {
         dismiss(animated: true, completion: nil)
     }
     
-    
     @IBAction func confirmCreateRoom(_ sender: Any) {
         
-        //TODO:: ADD ROOM TO FIREBASE
-        print("create room")
-        
-        
-        //TODO:: ON DISMISS IT SHOULD REUPDATE ROOM 
-        dismiss(animated: true, completion: nil)
+        if className.text == "" || subjectSelected == "" {
+            ProgressHUD.showError("All Fields Are Required")
+        }else{
+            
+            ProgressHUD.show()
+            db.collection("User").whereField("uid", isEqualTo: currentUserId!).getDocuments { (querySnapshot, error) in
+                for document in querySnapshot!.documents {
+                    let name = document.get("name") as! String
+                    self.teacherName = name
+                    
+                    self.db.collection("Room").addDocument(data: ["subjectName" : self.subjectSelected,"title":self.className.text!,"teacherName":self.teacherName]) { (error) in
+                        if error != nil {
+                            print("Error Creating Room")	
+                        }else{
+                            ProgressHUD.dismiss()
+                            self.dismiss(animated: true, completion: nil)
+                        }
+                        
+                    }
+                }
+            }
+
+
+        }
     }
     
     

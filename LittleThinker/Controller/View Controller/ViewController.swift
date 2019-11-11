@@ -7,8 +7,10 @@
 //
 
 import UIKit
-import FirebaseAuth
+//import FirebaseAuth
 import Firebase
+import ProgressHUD
+
 
 class ViewController: UIViewController {
     
@@ -20,13 +22,14 @@ class ViewController: UIViewController {
     var userName:String = ""
     
     //Firebase Declaration
-    let db = Firestore.firestore()
-    let authenetication = Auth.auth()
+    lazy var db = Firestore.firestore()
+    lazy var authenetication = Auth.auth()
     
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        ProgressHUD.hudColor(UIColor.black)
         
         //Hide Keyboard on outside tap
         self.hideKeyboard()
@@ -50,9 +53,10 @@ class ViewController: UIViewController {
         errorMessage.text = ""
         
         if emailField.text == "" || passwordField.text == ""{
-            errorMessage.text = "All Fields Are Required"
+            ProgressHUD.showError("All Fields Are Required")
         }else{
             
+            ProgressHUD.show()
             let email = emailField.text!
             let password = passwordField.text!
             
@@ -60,7 +64,7 @@ class ViewController: UIViewController {
             //TODO:: GET USER FROM FIREBASE THROUGH EMAIL AND PASSWORD
             Auth.auth().signIn(withEmail: email, password: password) { (user, error) in
                 if error != nil {
-                    self.errorMessage.text = error!.localizedDescription
+                    ProgressHUD.showError(error!.localizedDescription)
                 }else{
                     
                     let currentUser = Auth.auth().currentUser
@@ -74,24 +78,19 @@ class ViewController: UIViewController {
                             for document in querySnapshot!.documents {
                                 let name = document.get("name") as! String
                                 self.userName = name
-
+                                ProgressHUD.dismiss()
+                                print("The usename at viewcontroller is \(self.userName)")
+                                self.performSegue(withIdentifier: "homePage", sender: self)
                             }
                         }
                     }
-                    
-                    
-                    self.performSegue(withIdentifier: "homePage", sender: self)
                 }
+
             }
 
-            
-            
-            
             //CLEAR INPUT AFTER LOGIN
             emailField.text = ""
             passwordField.text = ""
-            
-
         }
     }
     
@@ -108,7 +107,7 @@ class ViewController: UIViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "homePage" {
             let vc = segue.destination as! HomeViewController
-            vc.user = userName
+            vc.user = self.userName
         }
         
         if segue.identifier == "forgotPassword" {

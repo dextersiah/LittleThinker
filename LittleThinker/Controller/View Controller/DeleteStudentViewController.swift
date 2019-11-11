@@ -7,14 +7,22 @@
 //
 
 import UIKit
+import Firebase
+import ProgressHUD
+
 
 class DeleteStudentViewController: UIViewController {
-
+    @IBOutlet weak var studentNameLabel: UILabel!
+    
+    let db = Firestore.firestore()
+    
      //TODO:: USE THIS AS REFERENCE TO WHICH STUDENT TO DELETE
-    var deletedStudentId = 0
+    var deletedStudentId:String = ""
+    var roomId:String = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        studentNameLabel.text = "Remove "+deletedStudentId
         // Do any additional setup after loading the view.
     }
 
@@ -24,10 +32,22 @@ class DeleteStudentViewController: UIViewController {
     }
     
     @IBAction func removeStudent(_ sender: Any) {
-        
-        
         //TODO:: DATA DATA TO FIREBASE
-        dismiss(animated: true, completion: nil)
+        ProgressHUD.show()
+        db.collection("Room").document(roomId).updateData(["student.\(deletedStudentId)" : FieldValue.delete()]) { (error) in
+            if error != nil {
+                print(error!.localizedDescription)
+            }else{
+                ProgressHUD.dismiss()
+                self.dismiss(animated: true, completion: nil)
+
+            }
+        }
+        
+    
+        
+        
+        
     }
     
     @IBAction func cancelDelete(_ sender: Any) {

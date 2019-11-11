@@ -9,6 +9,8 @@
 import UIKit
 import FirebaseAuth
 import Firebase
+import ProgressHUD
+
 
 class SignUpViewController: UIViewController {
 
@@ -30,13 +32,6 @@ class SignUpViewController: UIViewController {
         self.hideKeyboard()
 
         
-        if #available(iOS 10.0, *) {
-            passwordText.textContentType = UITextContentType("")
-            passwordText.autocorrectionType = .no
-            confirmPasswordText.textContentType = UITextContentType("")
-            confirmPasswordText.autocorrectionType = .no
-        }
-        
     }
 
     override func didReceiveMemoryWarning() {
@@ -52,31 +47,42 @@ class SignUpViewController: UIViewController {
         errorMessage.text = ""
         
         if emailText.text == "" || usernameText.text == "" || passwordText.text == "" || confirmPasswordText.text == "" {
-            errorMessage.text = "All fields are required"
+            ProgressHUD.showError("All fields are required")
         }else{
             
             if passwordText.text != confirmPasswordText.text {
-                errorMessage.text = "Password does mot match"
+                 ProgressHUD.showError("Password Does Not Match")
             }else{
                 
                 let name = usernameText.text!.trimmingCharacters(in: .whitespacesAndNewlines)
                 let email = emailText.text!.trimmingCharacters(in: .whitespacesAndNewlines)
                 let password = passwordText.text!.trimmingCharacters(in: .whitespacesAndNewlines)
                 
+                ProgressHUD.show()
                 
                 //TODO:: ADD USER TO FIREBASE AUTHENTICATION AND USERNAME TO FIREBASE WITH REFERENCE ID
                 Auth.auth().createUser(withEmail: email, password: password) { (result, error) in
                     if error != nil {
-                        self.errorMessage.text = error?.localizedDescription
+                       ProgressHUD.showError(error?.localizedDescription)
                     }else{
                         let db = Firestore.firestore()
                         
                         
                         db.collection("User").addDocument(data: ["name":name.capitalized,"uid":result!.user.uid], completion: { (error) in
                             if error != nil {
-                                self.errorMessage.text = error?.localizedDescription
+                                ProgressHUD.showError(error?.localizedDescription)
                             }else{
-                                _ = self.navigationController?.popViewController(animated: true)
+                                
+                                ProgressHUD.dismiss()
+                                
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {
+                                    ProgressHUD.showSuccess("Successfully Created Account")
+                                })
+                                
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { // Change `2.0` to the desired number of seconds.
+                                    _ = self.navigationController?.popViewController(animated: true)
+                                }
+                               
                             }
                         })
                     }
@@ -84,7 +90,7 @@ class SignUpViewController: UIViewController {
             }
 
             
-            errorMessage.text = "Sucessfully created account"
+            
         }
     }
     

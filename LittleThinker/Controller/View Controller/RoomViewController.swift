@@ -11,17 +11,19 @@ import Firebase
 
 class RoomViewController: UIViewController,UICollectionViewDataSource,UICollectionViewDelegate {
     
-    var roomId:String = ""
     @IBOutlet weak var roomCollectionView: UICollectionView!
     
     
     //TODO:: PULL DATA FROM FIREBASE USE SNAPSHOT LISTENER FOR REALTIME UPDATE
     let reuseIdentifier = "roomCell"
+    
     var teacherArray = [String]()
     var subjectArray = [String]()
     var subjectTitleArray = [String]()
     var studentCountArray = [String]()
-
+    var roomIds = [String]()
+    var clickedRoomId:String = ""
+    var students = [String:Any]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,35 +42,36 @@ class RoomViewController: UIViewController,UICollectionViewDataSource,UICollecti
                 return
             }
             
+            self.teacherArray = []
+            self.subjectArray = []
+            self.subjectTitleArray = []
+            self.studentCountArray = []
+            self.roomIds = []
+            
+            
             for document in documents.documents {
-                
-                
                 
                 let teacherName = document.get("teacherName") as! String
                 let subjectName = document.get("subjectName") as! String
                 let title = document.get("title") as! String
-                let students = document.get("student") as! [String : Any]
+                
+                if document.get("student") != nil {
+                    self.students = document.get("student") as! [String : Any]
+                    self.studentCountArray.append(String(self.students.count))
+                }else{
+                    self.studentCountArray.append("0")
+                }
                 
                 
                 self.teacherArray.append(teacherName)
                 self.subjectArray.append(subjectName)
                 self.subjectTitleArray.append(title)
-                self.studentCountArray.append(String(students.count))
-                
+
+                self.roomIds.append(String(document.documentID))
                 
             }
-            
-            print(self.teacherArray)
-            print(self.subjectArray)
-            print(self.subjectTitleArray)
-            print(self.studentCountArray)
             self.roomCollectionView.reloadData()
         }
-        
-        
-        
-
-        
     }
 
     override func didReceiveMemoryWarning() {
@@ -84,12 +87,12 @@ class RoomViewController: UIViewController,UICollectionViewDataSource,UICollecti
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath as IndexPath) as! CardCollectionViewCell
         
-        roomId = String(indexPath.item)
-        
-        cell.teacherName.text = teacherArray[indexPath.item]
-        cell.subjectName.text = subjectArray[indexPath.item]
-        cell.titleName.text = subjectTitleArray[indexPath.item]
-        cell.studentNo.text = studentCountArray[indexPath.item]
+        if !checkEmpty() {
+            cell.teacherName.text = teacherArray[indexPath.item]
+            cell.subjectName.text = subjectArray[indexPath.item]
+            cell.titleName.text = subjectTitleArray[indexPath.item]
+            cell.studentNo.text = studentCountArray[indexPath.item]
+        }
         
         return cell
     }
@@ -102,7 +105,12 @@ class RoomViewController: UIViewController,UICollectionViewDataSource,UICollecti
     
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print("selected cell \(indexPath.item)")
+        
+        clickedRoomId = roomIds[indexPath.item]
+        
+        print("selected cell \(clickedRoomId)")
+        
+        
         
         performSegue(withIdentifier: "roomDetail", sender: self)
     
@@ -115,8 +123,17 @@ class RoomViewController: UIViewController,UICollectionViewDataSource,UICollecti
         
         if segue.identifier == "roomDetail" {
             let vc = segue.destination as! RoomDetailViewController
-            vc.roomId = self.roomId
+            vc.roomId = self.clickedRoomId
         }
         
+    }
+    
+    func checkEmpty() -> Bool {
+        
+        if teacherArray.count <= 0 || subjectArray.count <= 0 || subjectTitleArray.count <= 0 || studentCountArray.count <= 0  || roomIds.count <= 0 || students.count <= 0 {
+            return true
+        }else{
+            return false
+        }
     }
 }
