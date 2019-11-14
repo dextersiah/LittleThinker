@@ -30,10 +30,9 @@ class ForgotPasswordViewController: UIViewController {
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
     
-    
+    //IBACTIONS
     @IBAction func goBack(_ sender: Any) {
         _ = navigationController?.popViewController(animated: true)
     }
@@ -42,16 +41,21 @@ class ForgotPasswordViewController: UIViewController {
         
         errorMessage.text = ""
         
+        //Validate Field
         if emailText.text == "" {
             ProgressHUD.showError("Email Field is Required")
         }else{
             
             let email = emailText.text!
             
+            //Send password reset link to email
             Auth.auth().sendPasswordReset(withEmail: email) { (error) in
                 if error == nil {
-                     ProgressHUD.showSuccess("A Reset Password Has Been Sent To Your Email")
+                    
+                    //Display Sucess HUD
+                    ProgressHUD.showSuccess("A Reset Password Has Been Sent To Your Email")
                 }else{
+                    //Display Error HUD
                     ProgressHUD.showError(error?.localizedDescription)
                 }
             }

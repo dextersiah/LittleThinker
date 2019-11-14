@@ -12,16 +12,18 @@ import Firebase
 class RoomViewController: UIViewController,UICollectionViewDataSource,UICollectionViewDelegate {
     
     @IBOutlet weak var roomCollectionView: UICollectionView!
-    
-    
-    //TODO:: PULL DATA FROM FIREBASE USE SNAPSHOT LISTENER FOR REALTIME UPDATE
+
     let reuseIdentifier = "roomCell"
+
+    
     
     var teacherArray = [String]()
     var subjectArray = [String]()
     var subjectTitleArray = [String]()
     var studentCountArray = [String]()
     var roomIds = [String]()
+    
+    
     var clickedRoomId:String = ""
     var students = [String:Any]()
     
@@ -35,58 +37,75 @@ class RoomViewController: UIViewController,UICollectionViewDataSource,UICollecti
         let roomCollection = db.collection("Room")
         
         
+        //Add a snapshot listener on roomCollection
         roomCollection.addSnapshotListener { (querySnapshot, error) in
             
-            guard let documents = querySnapshot else {
+            
+            //Validate erroor
+            guard let queryDocument = querySnapshot else {
                 print("Error fetching document: \(error!)")
                 return
             }
             
+            //Declare variables for collectionviewcell data
             self.teacherArray = []
             self.subjectArray = []
             self.subjectTitleArray = []
             self.studentCountArray = []
             self.roomIds = []
             
-            
-            for document in documents.documents {
+            //loop through entire document query
+            for document in queryDocument.documents {
                 
+                //Get the fields
                 let teacherName = document.get("teacherName") as! String
                 let subjectName = document.get("subjectName") as! String
                 let title = document.get("title") as! String
                 
+                
+                //Check if student field is empty
                 if document.get("student") != nil {
+                    
+                    //If its not empty get the data and append into a multidimentional dictionary
                     self.students = document.get("student") as! [String : Any]
+                    
+                    //Count the numbers of stuents inside studenr variable
                     self.studentCountArray.append(String(self.students.count))
                 }else{
+                    
+                    //Else append to empty
                     self.studentCountArray.append("0")
                 }
                 
-                
+                //Append all the values into global variable
                 self.teacherArray.append(teacherName)
                 self.subjectArray.append(subjectName)
                 self.subjectTitleArray.append(title)
-
                 self.roomIds.append(String(document.documentID))
                 
             }
+            
+            //Reload data on every snapshot
             self.roomCollectionView.reloadData()
         }
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
 
+    //Define number of items in section
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return self.teacherArray.count
     }
     
+    
+    //Populate data to collectionviewcell
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath as IndexPath) as! CardCollectionViewCell
         
+        //Check if the fields are empty
         if !checkEmpty() {
             cell.teacherName.text = teacherArray[indexPath.item]
             cell.subjectName.text = subjectArray[indexPath.item]
@@ -94,28 +113,25 @@ class RoomViewController: UIViewController,UICollectionViewDataSource,UICollecti
             cell.studentNo.text = studentCountArray[indexPath.item]
         }
         
+        //return collectionviewcell
         return cell
     }
     
     
     @IBAction func newRoom(_ sender: Any) {
         performSegue(withIdentifier: "newRoom", sender: self)
-        
     }
     
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
+        //Get the indexpath id and set to clickedRoomId
         clickedRoomId = roomIds[indexPath.item]
-        
-        print("selected cell \(clickedRoomId)")
-        
-        
-        
         performSegue(withIdentifier: "roomDetail", sender: self)
     
     }
     
+    //Prepare segue to open controller
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "newRoom" {
             let _ = segue.destination as! AddRoomViewController
@@ -128,6 +144,8 @@ class RoomViewController: UIViewController,UICollectionViewDataSource,UICollecti
         
     }
     
+    
+    //Function to validate fields
     func checkEmpty() -> Bool {
         
         if teacherArray.count <= 0 || subjectArray.count <= 0 || subjectTitleArray.count <= 0 || studentCountArray.count <= 0  || roomIds.count <= 0 || students.count <= 0 {

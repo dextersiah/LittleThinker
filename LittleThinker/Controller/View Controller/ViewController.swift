@@ -35,10 +35,7 @@ class ViewController: UIViewController {
         self.hideKeyboard()
         
         //Special Hide Navigation Bar For First View controller
-        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
-        self.navigationController?.navigationBar.shadowImage = UIImage()
-        self.navigationController?.navigationBar.isTranslucent = true
-        self.navigationController?.view.backgroundColor = UIColor.clear
+        clearNavigationBar()
         
     }
     
@@ -50,50 +47,62 @@ class ViewController: UIViewController {
 
     @IBAction func signIn(_ sender: Any) {
         
-        errorMessage.text = ""
         
         if emailField.text == "" || passwordField.text == ""{
             ProgressHUD.showError("All Fields Are Required")
         }else{
             
+            //Show HUD
             ProgressHUD.show()
             let email = emailField.text!
             let password = passwordField.text!
             
             
-            //TODO:: GET USER FROM FIREBASE THROUGH EMAIL AND PASSWORD
+            //Sign in user using email passsword
             Auth.auth().signIn(withEmail: email, password: password) { (user, error) in
+                
+                //Validate error
                 if error != nil {
                     ProgressHUD.showError(error!.localizedDescription)
                 }else{
                     
+                    //Get current user
                     let currentUser = Auth.auth().currentUser
                     
                     if currentUser != nil {
+                        
+                        //Get current user id
                         let userId = currentUser!.uid
-                        print(userId)
+                        
+                        //Get user details from User collection
                         self.db.collection("User").whereField("uid", isEqualTo: userId).getDocuments { (querySnapshot, error) in
                             
                             
                             for document in querySnapshot!.documents {
+                                
+                                //Get the user name
                                 let name = document.get("name") as! String
+                                
+                                //Set the name to global variable
                                 self.userName = name
+                                
+                                //Dimiss HUD
                                 ProgressHUD.dismiss()
-                                print("The usename at viewcontroller is \(self.userName)")
                                 self.performSegue(withIdentifier: "homePage", sender: self)
+                                
+                                //CLEAR INPUT AFTER LOGIN
+                                self.emailField.text = ""
+                                self.passwordField.text = ""
                             }
                         }
                     }
                 }
 
             }
-
-            //CLEAR INPUT AFTER LOGIN
-            emailField.text = ""
-            passwordField.text = ""
         }
     }
     
+    //IBaction to perform segue to next controller
     @IBAction func forgotPassword(_ sender: Any) {
         performSegue(withIdentifier: "forgotPassword", sender: self)
     }
@@ -103,7 +112,7 @@ class ViewController: UIViewController {
     }
     
     
-    
+    //Prepare segue to open next controller
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "homePage" {
             let vc = segue.destination as! HomeViewController
@@ -139,6 +148,15 @@ extension UIViewController{
         navigationController?.view.backgroundColor = UIColor.clear
     }
     
+    
+    //Set navigation bar to be opaque without any navigation items
+    func clearNavigationBar () {
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+        self.navigationController?.navigationBar.shadowImage = UIImage()
+        self.navigationController?.navigationBar.isTranslucent = true
+        self.navigationController?.view.backgroundColor = UIColor.clear
+    }
+    
     func customLogoutButton (){
         
         //Set custom back button with image and set the action to back
@@ -156,11 +174,13 @@ extension UIViewController{
     }
     
     
-    
+    //function to go back to previous opened controller
     @objc func back(sender: UIBarButtonItem){
         self.navigationController?.popViewController(animated: true)
     }
     
+    
+    //function to logout
     @objc func logout(sender: UIBarButtonItem){
         let authentication = Auth.auth()
         do {
@@ -172,7 +192,7 @@ extension UIViewController{
          self.navigationController?.popViewController(animated: true)
     }
     
-    
+    //function to hide keyboard when tap outside of keyboard
     func hideKeyboard(){
         let tap : UIGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(UIViewController.dismissKeyboard))
         

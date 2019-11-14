@@ -14,16 +14,18 @@ import ProgressHUD
 class DeleteStudentViewController: UIViewController {
     @IBOutlet weak var studentNameLabel: UILabel!
     
+    //Initialize Firebase db
     let db = Firestore.firestore()
     
-     //TODO:: USE THIS AS REFERENCE TO WHICH STUDENT TO DELETE
+    //Global Variable to hold data passed from DetailRoomViewController segue
     var deletedStudentId:String = ""
     var roomId:String = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        studentNameLabel.text = "Remove "+deletedStudentId
-        // Do any additional setup after loading the view.
+        
+        //Set title with student name
+        studentNameLabel.text = "Remove \(deletedStudentId)?"
     }
 
     override func didReceiveMemoryWarning() {
@@ -32,24 +34,28 @@ class DeleteStudentViewController: UIViewController {
     }
     
     @IBAction func removeStudent(_ sender: Any) {
-        //TODO:: DATA DATA TO FIREBASE
+        //Display HUD loading
         ProgressHUD.show()
+        
+        //Get a reference to the document based on global roomId and update the map field based on key
         db.collection("Room").document(roomId).updateData(["student.\(deletedStudentId)" : FieldValue.delete()]) { (error) in
+            
+            //Validate if error
             if error != nil {
                 print(error!.localizedDescription)
             }else{
+                
+                //Dismiss HUD loading
                 ProgressHUD.dismiss()
+                
+                //Dismiss Modal
                 self.dismiss(animated: true, completion: nil)
 
             }
         }
-        
-    
-        
-        
-        
     }
     
+    //Dismiss Modal
     @IBAction func cancelDelete(_ sender: Any) {
         dismiss(animated: true, completion: nil)
     }

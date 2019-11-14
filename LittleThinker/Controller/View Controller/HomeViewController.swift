@@ -14,9 +14,11 @@ class HomeViewController: UIViewController,UICollectionViewDelegate,UICollection
 
     let db = Firestore.firestore()
     let reuseIdentifier = "cell"
-    var myTitle = ["Science","Maths"]
-    var myImage = ["undraw_science_fqhl","undraw_mathematics_4otb"]
-    var row : Int = 0
+    var myTitle = ["Maths","Science"]
+    var myImage = ["undraw_mathematics_4otb","undraw_science_fqhl"]
+    var subjectSelected:String = ""
+    
+    
     var user:String = ""
     
     @IBOutlet weak var collectionView: UICollectionView!
@@ -24,17 +26,18 @@ class HomeViewController: UIViewController,UICollectionViewDelegate,UICollection
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        //Custom Logout button
         customLogoutButton()
-        print("username is \(user)")
         
-        
+        //Set text to current user name
         userName.text = user
         
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+
     }
     
     //DEFINE NUMBER OF ROWS
@@ -46,20 +49,7 @@ class HomeViewController: UIViewController,UICollectionViewDelegate,UICollection
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath as IndexPath) as! CardCollectionViewCell
         
-        
-        
-        cell.contentView.layer.cornerRadius = 5.0
-        cell.contentView.layer.borderWidth = 1.0
-        cell.contentView.layer.borderColor = UIColor.clear.cgColor
-        cell.contentView.layer.masksToBounds = true
-        
-        cell.layer.shadowColor = UIColor.black.cgColor
-        cell.layer.shadowOffset = CGSize(width: 2, height: 2)
-        cell.layer.shadowRadius = 4
-        cell.layer.shadowOpacity = 0.16
-        cell.layer.masksToBounds = false
-        cell.layer.shadowPath = UIBezierPath(roundedRect: cell.bounds, cornerRadius: cell.contentView.layer.cornerRadius).cgPath
-        
+        //Based on itempath.item display different background color
         if indexPath.item == 1 {
             cell.backgroundColor = UIColor(red: 251.0/255.0, green: 176.0/255.0, blue: 59.0/255.0, alpha: 1)
             cell.myTitle.text = myTitle[indexPath.item]
@@ -74,13 +64,12 @@ class HomeViewController: UIViewController,UICollectionViewDelegate,UICollection
     
     //GET SELECTED ROW AND PERFORM SEGUE
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print("selected at index \(indexPath.item)")
-        row = indexPath.item
+        subjectSelected = myTitle[indexPath.item]
         performSegue(withIdentifier: "gameQuestions", sender: self)
     }
     
     
-    //IBACTIONS
+    //IBACTIONS to perform segue
     @IBAction func goToRoomVC(_ sender: Any) {
         
         performSegue(withIdentifier: "roomList", sender: self)
@@ -100,7 +89,7 @@ class HomeViewController: UIViewController,UICollectionViewDelegate,UICollection
         
         if segue.identifier == "gameQuestions" {
             let vc = segue.destination as! QuestionsViewController
-            vc.id = self.row
+            vc.subjectName = self.subjectSelected
         }
         
         if segue.identifier == "generateReport" {
