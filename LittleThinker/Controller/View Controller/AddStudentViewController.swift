@@ -13,11 +13,15 @@ import ProgressHUD
 class AddStudentViewController: UIViewController {
 
     @IBOutlet weak var cancelButton: UIButton!
-    @IBOutlet weak var studentName: UITextField!
+    @IBOutlet weak var studentName: DropDown!
+    
     
     
     ///Global Variable to hold data passed from RoomDetailViewController segue
     var roomId:String = ""
+    
+    //Global variable to hold student array
+    var studentArray = [String]()
     
     //Initialize Firebase db
     let db = Firestore.firestore()
@@ -30,13 +34,22 @@ class AddStudentViewController: UIViewController {
         cancelButton.layer.borderWidth = 1
         cancelButton.layer.borderColor = UIColor.white.cgColor
         
-        
-        //Adding Custom Bottom Line TextField Style
-        let bottomLine = CALayer()
-        bottomLine.frame = CGRect(x: 0, y: studentName.frame.height - 2, width: studentName.frame.width, height: 1)
-        bottomLine.backgroundColor = UIColor(red: 180/255, green: 180/255, blue: 180/255, alpha: 0.5).cgColor
-        studentName.borderStyle = .none
-        studentName.layer.addSublayer(bottomLine)
+
+        db.collection("Student").getDocuments { (querySnapshot, error) in
+            guard let queryDocuments = querySnapshot else {
+                print("Error")
+                return
+            }
+            
+            for document in queryDocuments.documents{
+                let student = document.get("name") as! String
+                print(student)
+                self.studentArray.append(student)
+            }
+            
+            //Adding Data to DropDown
+            self.studentName.optionArray = self.studentArray
+        }
         
     }
 

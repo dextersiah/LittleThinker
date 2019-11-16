@@ -40,6 +40,7 @@ import Firebase
 
         @IBOutlet weak var collectionView: UICollectionView!
         
+        @IBOutlet weak var roomTitle: UILabel!
         //Initialize Firebase db
         let db = Firestore.firestore()
         
@@ -48,6 +49,7 @@ import Firebase
         
         //Global Variable to hold data passed from RoomViewController segue
         var roomId:String = ""
+        var roomtitle:String = ""
         
         //Iniitalize variable for collection view data
         var studentsArray = [String]()
@@ -70,6 +72,13 @@ import Firebase
                 
                 //Reinitialize array to be empty to prevent duplicate data
                 self.studentsArray = []
+                
+                let getTitle = document.get("title") as! String
+                
+                
+                self.roomTitle.text = getTitle
+                self.roomtitle = getTitle
+                
                 
                 //Check if student vield exists
                 if document.get("student") != nil {
@@ -165,6 +174,7 @@ import Firebase
                 let vc = segue.destination as! StartGameViewController
                 vc.roomId = self.roomId
                 vc.studentArray = self.studentsArray
+                vc.roomTitle = self.roomtitle
             }
         }
         

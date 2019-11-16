@@ -13,6 +13,7 @@ class QuestionsViewController: UIViewController,UICollectionViewDelegate,UIColle
 
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var subjectTitle: UILabel!
+    
     //Initialize Firebase DB
     let db = Firestore.firestore()
     

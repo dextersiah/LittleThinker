@@ -54,9 +54,15 @@ class ForgotPasswordViewController: UIViewController {
                     
                     //Display Sucess HUD
                     ProgressHUD.showSuccess("A Reset Password Has Been Sent To Your Email")
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: {
+                        _ = self.navigationController?.popViewController(animated: true)
+                    })
+                   
                 }else{
                     //Display Error HUD
                     ProgressHUD.showError(error?.localizedDescription)
+                   
                 }
             }
         }

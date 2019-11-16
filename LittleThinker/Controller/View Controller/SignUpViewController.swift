@@ -30,7 +30,6 @@ class SignUpViewController: UIViewController {
         
         //Hide Keyboard on outside tap
         self.hideKeyboard()
-
         
     }
 

@@ -19,6 +19,7 @@ class StartGameViewController: UIViewController {
     
     //Global Variable to hold data passed from DetailRoomViewController segue
     var roomId = ""
+    var roomTitle = ""
     var selectedStudent = ""
     var studentArray = [String]()
     
@@ -66,6 +67,34 @@ class StartGameViewController: UIViewController {
                 }else{
                     self.db.collection("currentGame").addDocument(data: ["roomId" : self.roomId,"student":self.selectedStudent])
                     
+                    //Find id document report of roomID exists in the collection
+                    self.db.collection("Report").whereField("roomId", isEqualTo: self.roomId).getDocuments(completion: { (querySnapshot, error) in
+                        guard let queryDocuments = querySnapshot else {
+                            print("query error")
+                            return
+                        }
+                        
+                        //There is no document of roomID field
+                        if queryDocuments.isEmpty{
+                            let newReportRoom  = self.db.collection("Report").document()
+                            let newReportRoomID = newReportRoom.documentID
+                            
+                            newReportRoom.setData(["roomId":self.roomId,"roomTitle":self.roomTitle])
+                            self.db.collection("Report").document(newReportRoomID).collection("Student_Answer").document().setData(["studentName":self.selectedStudent])
+                            
+                        //Document found with the field of roomId
+                        }else{
+                            for document in queryDocuments.documents{
+                                
+                                //Get the document Id
+                                let docId = document.documentID
+                                print(docId)
+                                //Set a subcollection with document of the studentName
+                                self.db.collection("Report").document(docId).collection("Student_Answer").document().setData(["studentName":self.selectedStudent])
+                            }
+                        }
+                        
+                    })
                     //Display Game is Starting on HUD
                     ProgressHUD.showSuccess("Game Is Starting Soon")
                     

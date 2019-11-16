@@ -45,7 +45,7 @@ class AddRoomViewController: UIViewController {
         
         
         //Set options on dropdown
-        subjectSelection.optionArray = ["Maths","Science","English"]
+        subjectSelection.optionArray = ["Maths","Science"]
         subjectSelection.optionIds = [1,2,3]
         
         //Get selected item from dropdown

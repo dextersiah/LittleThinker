@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Firebase
 
 
 class reportCollectionViewCell : UICollectionViewCell{
@@ -21,13 +22,22 @@ class GenerateReportViewController: UIViewController,UICollectionViewDelegate,UI
     
     @IBOutlet weak var roomLists: DropDown!
     
+    //Initialize Firebase
+    let db = Firestore.firestore()
+    
+    //Pass Report To ReportDetailController
     var reportDetails:Int = 0
     
+    //Global Variable for CollectionViewCell
     let number = ["1","2","3","4"]
     let name = ["Brandon","Arthur","Louise","Johan"]
     let marks = ["4/5","4/5","5/5","1/5"]
     let time = ["1min 2 sec","1min 5 sec","1min 7sec","1min 30sec"]
     var roomList = [String]()
+    
+    //Global Variable
+    var subjectName:String = ""
+    
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return self.number.count
@@ -60,10 +70,20 @@ class GenerateReportViewController: UIViewController,UICollectionViewDelegate,UI
         roomLists.optionIds = [1,2,3]
         
         roomLists.didSelect{(selectedText,index,id) in
-            print(selectedText)
+            self.subjectName = selectedText
         }
-
+        
+        if subjectName != ""{
+            db.collection("<#T##collectionPath: String##String#>")
+        }
+        
+        
     }
+    
+    
+    
+    
+    
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()

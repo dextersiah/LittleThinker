@@ -37,6 +37,8 @@ class ViewController: UIViewController {
         //Special Hide Navigation Bar For First View controller
         clearNavigationBar()
         
+        //
+        
     }
     
     override func didReceiveMemoryWarning() {
