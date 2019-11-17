@@ -7,7 +7,8 @@
 //
 
 import UIKit
-
+import Firebase
+import ProgressHUD
 
 class StudentAnswerCollectionViewCell : reportCollectionViewCell {
     
@@ -23,97 +24,114 @@ class StudentAnswerCollectionViewCell : reportCollectionViewCell {
 
 class ReportDetailsViewController: UIViewController,UICollectionViewDataSource,UICollectionViewDelegate {
 
-    var reportId:Int = 0
+    var reportId:String = ""
+    var studName:String = ""
+    var totalMarks:String = ""
+    var subjName:String = ""
     
     //OUTLETS
     @IBOutlet weak var studentName: UILabel!
     @IBOutlet weak var timeCompleted: UILabel!
     @IBOutlet weak var score: UILabel!
+    @IBOutlet weak var collectionView: UICollectionView!
     
-    
-    //TODO:: PULL DATA REPORT FROM FIEBASE
-    var name = "Julina"
     var timeDone = "1min 2sec"
-    var studentScore = "3/5"
     
     
     //TODO:: PULL QUESTIONS FROM FIREBASE
-    let questions = [
-        0 : "What is 5 + 10?",
-        1 : "What is 10 + 10?",
-        2 : "What is 20 - 9?",
-        3 : "What is 100 - 4?",
-        4 : "What is 200 - 1 +4?"
-    ]
+    var questions = [Int:String]()
+    var answers = [Int:[String:String]]()
+    var correctAnswer = [Int:String]()
+    var studentAnswer = [Int:String]()
+    var count:Int = 0
     
-    //TODO:: PULL ASSOCIATED ANSWER FROM FIREBASE
-    let answers = [
-        0 : [
-            "a": "11",
-            "b": "510",
-            "c" : "15",
-            "d" : "12"
-        ],
-        
-        1: [
-            "a" : "10",
-            "b" : "11",
-            "c" : "1010",
-            "d" : "13"
-        ],
-        
-        2 : [
-            "a" : "29",
-            "b" : "22",
-            "c" : "17",
-            "d" : "11"
-        ],
-        
-        3 : [
-            "a" : "96",
-            "b" : "99",
-            "c" : "39",
-            "d" : "93"
-        ],
-        
-        4 : [
-            "a" : "201",
-            "b" : "203",
-            "c" : "15",
-            "d" : "12"
-        ],
-        ]
-    
-    //TODO:: PULL CORRECT ANSWER FROM FIREBASE
-    let correctAnswer = [
-        0 : "c",
-        1 : "a",
-        2 : "d",
-        3 : "a",
-        4 : "b"
-    ]
-    
-    //TODO:: PULL STUDENT SELECTED ANSWER FROM FIREBASE
-    let studentAnswer = [
-        0 : "a",
-        1 : "a",
-        2 : "c",
-        3 : "a",
-        4 : "c"
-    ]
-    
-    
+    //Initialize DB
+    let db = Firestore.firestore()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         customBackButton()
-    
         
-        studentName.text = "Name: "+name
+        // data from GenerateReportController
+        studentName.text = "Name: "+studName
         timeCompleted.text = "Time: "+timeDone
-        score.text = studentScore
+        score.text = totalMarks
         
+        
+        getStudentAnswer {
+            ProgressHUD.show()
+            
+            self.getQuestionAnswer {
+                ProgressHUD.dismiss()
+                self.collectionView.reloadData()
+            }
+        }
+
     }
+    
+    func getStudentAnswer(completion: @escaping()->Void){
+        db.collectionGroup("Student_Answer").whereField("studentName", isEqualTo: studName).getDocuments { (querySnapshot, error) in
+            guard let querySnapshot = querySnapshot else{
+                print(error!.localizedDescription)
+                return
+            }
+            
+            for document in querySnapshot.documents{
+                let studentAnsDict = document.get("answers") as! [String:String]
+                
+                let sortedAns = studentAnsDict.sorted(by: {$0.key < $1.key})
+                
+                
+                var counter = 0
+                for answers in sortedAns{
+                    self.studentAnswer[counter] = answers.value
+                    counter+=1
+                }
+            }
+            completion()
+        }
+    }
+    
+    func getQuestionAnswer(completion: @escaping()-> Void){
+        
+        //Get document from subject collection based on name fields
+        db.collection("Subject").whereField("name", isEqualTo: self.subjName).getDocuments { (querySnapshot, error) in
+            
+            //Check if error
+            if error != nil {
+                print(error!.localizedDescription)
+            }
+            
+            //Loop through the array of documents
+            for document in querySnapshot!.documents {
+                let documentId = document.documentID
+                
+                //Based on root document ID, get the subCollection document
+                self.db.collection("Subject").document(documentId).collection("Question").getDocuments(completion: { (subQuerySnapshot, error) in
+                    
+                    //Loop through the array of documents
+                    for subDocument in subQuerySnapshot!.documents {
+                        
+                        //Get the specific fields in document
+                        let getQuestion = subDocument.get("question") as! String
+                        let getAnswer = subDocument.get("answers") as! [String:String]
+                        let getCorrectAnswer = subDocument.get("correctAnswer") as! String
+                        
+                        //Append Value to global variable with as a dictionary
+                        self.questions[self.count] = getQuestion
+                        self.answers[self.count] = getAnswer
+                        self.correctAnswer[self.count] = getCorrectAnswer
+                        self.count+=1
+                        
+                    }
+                    
+                    completion()
+                })
+            }
+        }
+    }
+    
+    
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -131,18 +149,22 @@ class ReportDetailsViewController: UIViewController,UICollectionViewDataSource,U
         
         //Set Question
         cell.question.text = questions[indexPath.item]
-        
+
         let currentItem = indexPath.item
-        
+
+        //Loop through multidimentional dictionary
         for index in answers {
+            
+            //Check the dict.key if equals to current indexPath.item number
             if index.key == currentItem {
                 
-                //Set Answers Question Number
+                //Set Question Number
                 cell.questionNumber.text = "Question \(currentItem+1)"
                 
-                
-                //Set the Answers
+                //Loop through the individual
                 for item in answers[index.key]! {
+                    
+                    //Populate the data based on the key
                     switch item.key {
                     case "a":
                         cell.answerA.text = "a. "+item.value
@@ -161,10 +183,11 @@ class ReportDetailsViewController: UIViewController,UICollectionViewDataSource,U
                     }
                 }
                 
-                //Set Students Answer and set color text to red
-                for answers in studentAnswer[index.key]!{
-                    switch answers {
+                
+                for studentAnswer in studentAnswer[index.key]!{
+                    switch studentAnswer {
                     case "a":
+                        //Set text color to green as idicate correct answer
                         cell.answerA.textColor = UIColor(red: 1, green: 0, blue: 0, alpha: 1)
                         
                     case "b":
@@ -182,30 +205,33 @@ class ReportDetailsViewController: UIViewController,UICollectionViewDataSource,U
                 }
                 
                 
-                
-                //Set Correct Answer and set color text to green
+                //Loop through dictionary answers based on index
                 for answers in correctAnswer[index.key]!{
                     switch answers {
                     case "a":
+                        //Set text color to green as idicate correct answer
                         cell.answerA.textColor = UIColor(red: 73/255, green: 190/255, blue: 89/255, alpha: 1)
-                        
+
                     case "b":
                         cell.answerB.textColor = UIColor(red: 73/255, green: 190/255, blue: 89/255, alpha: 1)
-                        
+
                     case "c":
                         cell.answerC.textColor = UIColor(red: 73/255, green: 190/255, blue: 89/255, alpha: 1)
-                        
+
                     case "d":
                         cell.answerD.textColor = UIColor(red: 73/255, green: 190/255, blue: 89/255, alpha: 1)
-                        
+
                     default:
                         print("NO ANSWER")
                     }
                 }
+                
+                
+
+                
+                
             }
         }
-        
-        
         
         return cell
     }

@@ -8,6 +8,7 @@
 
 import UIKit
 import Firebase
+import ProgressHUD
 
 class QuestionsViewController: UIViewController,UICollectionViewDelegate,UICollectionViewDataSource {
 
@@ -35,7 +36,7 @@ class QuestionsViewController: UIViewController,UICollectionViewDelegate,UIColle
 
         //Get document from subject collection based on name fields
         db.collection("Subject").whereField("name", isEqualTo: subjectName).getDocuments { (querySnapshot, error) in
-
+            ProgressHUD.show()
             //Check if error
             if error != nil {
                 print(error!.localizedDescription)
@@ -68,6 +69,7 @@ class QuestionsViewController: UIViewController,UICollectionViewDelegate,UIColle
                     
                     //Reload collection view after querySnapshot ends
                     self.collectionView.reloadData()
+                    ProgressHUD.dismiss()
                 })
             }
         }

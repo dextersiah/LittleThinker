@@ -8,7 +8,7 @@
 
 import UIKit
 import Firebase
-
+import ProgressHUD
 
 class reportCollectionViewCell : UICollectionViewCell{
     
@@ -27,7 +27,11 @@ class GenerateReportViewController: UIViewController,UICollectionViewDelegate,UI
     let db = Firestore.firestore()
     
     //Pass Report To ReportDetailController
-    var reportDetails:Int = 0
+    var reportDetails:String = ""
+    var studentName:String = ""
+    var reportIdArray = [String]()
+    var totalMarks:String = ""
+    var subjName:String = ""
     
     //Global Variable for CollectionViewCell
     var name = [String]()
@@ -38,8 +42,7 @@ class GenerateReportViewController: UIViewController,UICollectionViewDelegate,UI
     var correctAnswer = [String]()
     var studentAnswer = [String]()
 
-    
-    
+
     //Array for dropdown roomlist
     var roomList = [String]()
     
@@ -54,17 +57,19 @@ class GenerateReportViewController: UIViewController,UICollectionViewDelegate,UI
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "reportCell", for: indexPath) as! reportCollectionViewCell
 
-        cell.number.text = String(indexPath.item)
+        cell.number.text = String(indexPath.item + 1)
         cell.studentName.text = name[indexPath.item]
         cell.marks.text = marks[indexPath.item]
         cell.timeCompleted.text = time[indexPath.item]
     
-        
+
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        reportDetails = indexPath.item
+        reportDetails = reportIdArray[indexPath.item]
+        studentName = name[indexPath.item]
+        totalMarks = marks[indexPath.item]
         
         performSegue(withIdentifier: "reportDetails", sender: self)
     }
@@ -76,12 +81,17 @@ class GenerateReportViewController: UIViewController,UICollectionViewDelegate,UI
         
         db.collection("Room").getDocuments { (querySnapshot,error) in
             for doc in querySnapshot!.documents{
+                
+                //Get the room title name
                 let roomTitle = doc.get("title") as! String
+                
+                //Append to roomLists array options
                 self.roomLists.optionArray.append(roomTitle)
             }
         }
         
         roomLists.didSelect{(selectedText,index,id) in
+            ProgressHUD.show()
             
             //Reinitialize answers
             self.correctAnswer = []
@@ -107,25 +117,27 @@ class GenerateReportViewController: UIViewController,UICollectionViewDelegate,UI
                         
                         //Get the documentId and fields
                         let docId = doc.documentID
-                        let subjName = doc.get("subjectName") as! String
+                        self.subjName = doc.get("subjectName") as! String
                         
-                        self.getStudentAnswer(id: docId, completion: {
-                            
-                            self.getCorrectAnswer(subjName: subjName, completion: {
-                                
-                                let incorrectNumber = self.compareDifference(correctAnswer: self.correctAnswer, studentAnswer: self.studentAnswer)
-                                self.marks.append(incorrectNumber)
+                        
+                        self.getCorrectAnswer(subjName: self.subjName, completion: {
+                            self.getStudentAnswer(id: docId, completion: {
                                 self.collectionView.reloadData()
+                                ProgressHUD.dismiss()
                             })
                         })
+
                     }
                 })
             }
-
         }
-        
     }
     
+    /*
+     author: Dexter Siah
+     description: using closure for a function
+     ref: https://firebase.googleblog.com/2018/07/swift-closures-and-firebase-handling.html
+     */
     func getStudentAnswer(id:String, completion:@escaping() -> Void){
         
         //Get subcollection document of Student_Answer using the document iD
@@ -138,23 +150,35 @@ class GenerateReportViewController: UIViewController,UICollectionViewDelegate,UI
             }
             
             for doc in answerQuery.documents{
+                
+                self.reportIdArray.append(doc.documentID)
+                
+                self.studentAnswer = []
+                
                 //The the answers dictionary
                 let answersDict = doc.get("answers") as! [String:String]
-                
-                
                 let studentName = doc.get("studentName") as! String
                 
                 //Append the student name to global variable name
                 self.name.append(studentName)
                 
-                //Sort the dictionary by key
+                /*
+                 author:Dexter Siah
+                 desc: dictionary values that are queried from online database does not retain its order as dictionary does not have any order
+                 ref: http://studyswift.blogspot.com/2017/05/how-to-sort-array-and-dictionary.html
+                 */
                 let sortedAns = answersDict.sorted(by: {$0.key < $1.key})
+
                 
                 //Loop through sorted dictionary and append to global variable
                 for value in sortedAns{
                     self.studentAnswer.append(value.value)
                 }
+                
+                let incorrectNumber = self.compareDifference(correctAnswer: self.correctAnswer, studentAnswer: self.studentAnswer)
+                self.marks.append(incorrectNumber)
             }
+
             completion()
         })
     }
@@ -168,6 +192,10 @@ class GenerateReportViewController: UIViewController,UICollectionViewDelegate,UI
             }
             
             for doc in answerQuery.documents{
+                
+                
+                
+                
                 self.db.collection("Subject").document(doc.documentID).collection("Question").getDocuments(completion: { (querySnapshot, error) in
                     guard let answerQuery = querySnapshot else{
                         print(error!.localizedDescription)
@@ -178,29 +206,30 @@ class GenerateReportViewController: UIViewController,UICollectionViewDelegate,UI
                         let correctAns = doc.get("correctAnswer") as! String
                         self.correctAnswer.append(correctAns)
                     }
+                
                     completion()
                 })
             }
         })
     }
     
-    
+    //Custom function map 2 array and return the difference
     func compareDifference(correctAnswer:[String],studentAnswer:[String]) -> String{
         
-        var incorrectCounter = 0
+        var correctCounter = 0
         var questionCounter = 0
         
         for (index,correctAns) in correctAnswer.enumerated(){
             for (stdIndex,studentAns) in studentAnswer.enumerated(){
                 if index == stdIndex{
-                    if correctAns != studentAns{
-                        incorrectCounter+=1
+                    if correctAns == studentAns{
+                        correctCounter+=1
                     }
                 }
-                questionCounter+=1
             }
+            questionCounter+=1
         }
-        return String("\(incorrectCounter)/\(questionCounter)")
+        return String("\(correctCounter)/\(questionCounter)")
     }
     
     
@@ -214,6 +243,9 @@ class GenerateReportViewController: UIViewController,UICollectionViewDelegate,UI
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let vc = segue.destination as! ReportDetailsViewController
         vc.reportId = self.reportDetails
+        vc.studName = self.studentName
+        vc.totalMarks = self.totalMarks
+        vc.subjName = self.subjName
     }
     
 }
