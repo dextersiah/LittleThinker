@@ -47,9 +47,11 @@ import Firebase
         //Global Variable to hold data passed to DeleteStudentViewController segue
         var deleteStudentId:String = ""
         
-        //Global Variable to hold data passed from RoomViewController segue
+        //Global Variable to hold data passed to StartGameViewController segue
         var roomId:String = ""
         var roomtitle:String = ""
+        var subjectName:String = ""
+        
         
         //Iniitalize variable for collection view data
         var studentsArray = [String]()
@@ -73,11 +75,14 @@ import Firebase
                 //Reinitialize array to be empty to prevent duplicate data
                 self.studentsArray = []
                 
+                //Get the room title name as pass to variable
                 let getTitle = document.get("title") as! String
-                
-                
                 self.roomTitle.text = getTitle
                 self.roomtitle = getTitle
+                
+                //Get subject name and pass to global variable
+                let subjName = document.get("subjectName") as! String
+                self.subjectName = subjName
                 
                 
                 //Check if student vield exists
@@ -175,6 +180,7 @@ import Firebase
                 vc.roomId = self.roomId
                 vc.studentArray = self.studentsArray
                 vc.roomTitle = self.roomtitle
+                vc.subjectName = self.subjectName
             }
         }
         

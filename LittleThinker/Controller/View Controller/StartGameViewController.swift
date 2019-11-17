@@ -21,6 +21,7 @@ class StartGameViewController: UIViewController {
     var roomId = ""
     var roomTitle = ""
     var selectedStudent = ""
+    var subjectName = ""
     var studentArray = [String]()
     
     
@@ -79,7 +80,7 @@ class StartGameViewController: UIViewController {
                             let newReportRoom  = self.db.collection("Report").document()
                             let newReportRoomID = newReportRoom.documentID
                             
-                            newReportRoom.setData(["roomId":self.roomId,"roomTitle":self.roomTitle])
+                            newReportRoom.setData(["roomId":self.roomId,"roomTitle":self.roomTitle,"subjectName":self.subjectName])
                             self.db.collection("Report").document(newReportRoomID).collection("Student_Answer").document().setData(["studentName":self.selectedStudent])
                             
                         //Document found with the field of roomId
